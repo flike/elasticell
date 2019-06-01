@@ -219,10 +219,9 @@ func (s *Store) execHGet(id uint64, req *raftcmdpb.Request) *raftcmdpb.Response 
 		return rsp
 	}
 
-	has := true
 	rsp := pool.AcquireResponse()
 	rsp.BulkResult = value
-	rsp.HasEmptyBulkResult = &has
+	rsp.HasEmptyBulkResult = len(value) == 0
 
 	return rsp
 }
@@ -275,10 +274,9 @@ func (s *Store) execHKeys(id uint64, req *raftcmdpb.Request) *raftcmdpb.Response
 		return rsp
 	}
 
-	var has = true
 	rsp := pool.AcquireResponse()
 	rsp.SliceArrayResult = value
-	rsp.HasEmptySliceArrayResult = &has
+	rsp.HasEmptySliceArrayResult = len(value) == 0
 
 	return rsp
 }
@@ -302,10 +300,9 @@ func (s *Store) execHVals(id uint64, req *raftcmdpb.Request) *raftcmdpb.Response
 		return rsp
 	}
 
-	var has = true
 	rsp := pool.AcquireResponse()
 	rsp.SliceArrayResult = value
-	rsp.HasEmptySliceArrayResult = &has
+	rsp.HasEmptySliceArrayResult = len(value) == 0
 
 	return rsp
 }
@@ -329,10 +326,40 @@ func (s *Store) execHGetAll(id uint64, req *raftcmdpb.Request) *raftcmdpb.Respon
 		return rsp
 	}
 
-	var has = true
 	rsp := pool.AcquireResponse()
 	rsp.FvPairArrayResult = value
-	rsp.HasEmptyFVPairArrayResult = &has
+	rsp.HasEmptyFVPairArrayResult = len(value) == 0
+
+	return rsp
+}
+
+func (s *Store) execHScanGet(id uint64, req *raftcmdpb.Request) *raftcmdpb.Response {
+	cmd := redis.Command(req.Cmd)
+	args := cmd.Args()
+
+	if len(args) != 3 {
+		rsp := pool.AcquireResponse()
+		rsp.ErrorResult = redis.ErrInvalidCommandResp
+		return rsp
+	}
+
+	count, err := util.StrInt64(args[2])
+	if err != nil {
+		rsp := pool.AcquireResponse()
+		rsp.ErrorResult = util.StringToSlice(err.Error())
+		return rsp
+	}
+
+	value, err := s.getHashEngine(id).HScanGet(args[0], args[1], int(count))
+	if err != nil {
+		rsp := pool.AcquireResponse()
+		rsp.ErrorResult = util.StringToSlice(err.Error())
+		return rsp
+	}
+
+	rsp := pool.AcquireResponse()
+	rsp.FvPairArrayResult = value
+	rsp.HasEmptyFVPairArrayResult = len(value) == 0
 
 	return rsp
 }
@@ -385,10 +412,9 @@ func (s *Store) execHMGet(id uint64, req *raftcmdpb.Request) *raftcmdpb.Response
 		return rsp
 	}
 
-	has := true
 	rsp := pool.AcquireResponse()
 	rsp.SliceArrayResult = value
-	rsp.HasEmptySliceArrayResult = &has
+	rsp.HasEmptySliceArrayResult = len(value) == 0
 
 	return rsp
 

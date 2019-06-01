@@ -16,10 +16,16 @@
 package storage
 
 import (
+	"bytes"
+
 	"github.com/deepfabric/elasticell/pkg/pb/raftcmdpb"
 	"github.com/deepfabric/elasticell/pkg/util"
 	gonemo "github.com/deepfabric/go-nemo"
 	"golang.org/x/net/context"
+)
+
+var (
+	endScan = []byte("")
 )
 
 type nemoHashEngine struct {
@@ -64,6 +70,35 @@ func (e *nemoHashEngine) HKeys(key []byte) ([][]byte, error) {
 
 func (e *nemoHashEngine) HVals(key []byte) ([][]byte, error) {
 	return e.db.HVals(key)
+}
+
+func (e *nemoHashEngine) HScanGet(key, start []byte, count int) ([]*raftcmdpb.FVPair, error) {
+	iter := e.db.HScan(key, start, endScan, true)
+
+	var result []*raftcmdpb.FVPair
+	for {
+		if len(result) == count {
+			break
+		}
+
+		if !iter.Valid() {
+			break
+		}
+
+		field := iter.Field()
+		value := iter.Value()
+		if !bytes.Equal(start, field) {
+			result = append(result, &raftcmdpb.FVPair{
+				Field: field,
+				Value: value,
+			})
+		}
+
+		iter.Next()
+	}
+
+	iter.Free()
+	return result, nil
 }
 
 func (e *nemoHashEngine) HGetAll(key []byte) ([]*raftcmdpb.FVPair, error) {

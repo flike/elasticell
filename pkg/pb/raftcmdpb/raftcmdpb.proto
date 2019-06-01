@@ -38,19 +38,20 @@ enum CMDType {
     MSetNX   = 213;
 
     // Hash
-    HSet    = 300;
-    HGet    = 301;
-    HDel    = 302;
-    HExists = 303;
-    HKeys   = 304;
-    HVals   = 305;
-    HGetAll = 306;
-    HLen    = 307;
-    HMGet   = 308;
-    HMSet   = 309;
-    HSetNX  = 310;
-    HStrLen = 311;
-    HIncrBy = 312;
+    HSet     = 300;
+    HGet     = 301;
+    HDel     = 302;
+    HExists  = 303;
+    HKeys    = 304;
+    HVals    = 305;
+    HGetAll  = 306;
+    HLen     = 307;
+    HMGet    = 308;
+    HMSet    = 309;
+    HSetNX   = 310;
+    HStrLen  = 311;
+    HIncrBy  = 312;
+    HScanGet = 313;
 
     // lists
     LIndex    = 400;
@@ -91,6 +92,11 @@ enum CMDType {
     ZRemRangeByRank  = 612;                    
     ZRemRangeByScore = 613;
     ZScore           = 614;
+
+    // lock
+    Lock     = 700;
+    Unlock   = 701;
+    Lockable = 702;
 }
 
 enum AdminCmdType {
@@ -213,24 +219,24 @@ message Request {
 }
 
 message Response {
-    optional bytes         uuid                         = 1 [(gogoproto.customname) = "UUID"];
-    optional CMDType       type                         = 2 [(gogoproto.nullable) = false];
-    optional bytes         errorResult                  = 3;
-    repeated bytes         errorResults                 = 4;
-    optional bytes         statusResult                 = 5;
-    optional int64         integerResult                = 6;
-    optional bytes         bulkResult                   = 7;
-    optional bool          hasEmptyBulkResult           = 8;
-    repeated bytes         sliceArrayResult             = 9;
-    optional bool          hasEmptySliceArrayResult     = 10;
-    repeated FVPair        fvPairArrayResult            = 11;
-    optional bool          hasEmptyFVPairArrayResult    = 12;
-    repeated ScorePair     scorePairArrayResult         = 13;
-    optional bool          hasEmptyScorePairArrayResult = 14;
-    optional bool          withscores                   = 15;
-    optional Request       originRequest                = 16 [(gogoproto.nullable) = true];
-    optional int64         sessionID                    = 17 [(gogoproto.nullable) = false];
-    repeated querypb.Document  docArrayResult           = 18;
-    optional bool          hasEmptyDocArrayResult       = 19;
-    optional errorpb.Error error                        = 20 [(gogoproto.nullable) = false];
+    optional bytes             uuid                         = 1 [(gogoproto.customname) = "UUID"];
+    optional CMDType           type                         = 2 [(gogoproto.nullable) = false];
+    optional bytes             errorResult                  = 3;
+    repeated bytes             errorResults                 = 4;
+    optional bytes             statusResult                 = 5;
+    optional int64             integerResult                = 6;
+    optional bytes             bulkResult                   = 7;
+    optional bool              hasEmptyBulkResult           = 8 [(gogoproto.nullable) = false];
+    repeated bytes             sliceArrayResult             = 9;
+    optional bool              hasEmptySliceArrayResult     = 10 [(gogoproto.nullable) = false];
+    repeated FVPair            fvPairArrayResult            = 11;
+    optional bool              hasEmptyFVPairArrayResult    = 12 [(gogoproto.nullable) = false];
+    repeated ScorePair         scorePairArrayResult         = 13;
+    optional bool              hasEmptyScorePairArrayResult = 14 [(gogoproto.nullable) = false];
+    optional bool              withscores                   = 15 [(gogoproto.nullable) = false];
+    optional Request           originRequest                = 16 [(gogoproto.nullable) = true];
+    optional int64             sessionID                    = 17 [(gogoproto.nullable) = false];
+    repeated querypb.Document  docArrayResult               = 18;
+    optional bool              hasEmptyDocArrayResult       = 19 [(gogoproto.nullable) = false];
+    optional errorpb.Error     error                        = 20 [(gogoproto.nullable) = false];
 }
